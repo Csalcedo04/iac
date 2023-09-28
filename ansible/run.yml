@@ -1,0 +1,17 @@
+---
+- name: Base installation
+  hosts: all
+  become: yes
+  roles:
+    - role: system
+    - role: docker
+  vars_files:
+    - ./vars/main.yml
+
+- name: Install and setup VPN
+  hosts: wireguard
+  become: yes
+  roles:
+    - role: wireguard
+  vars_files:
+    - ./vars/main.yml

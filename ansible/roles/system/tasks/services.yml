@@ -1,0 +1,4 @@
+- name: Make sure rsync service is running
+  systemd:
+    name: rsync
+    enabled: true
