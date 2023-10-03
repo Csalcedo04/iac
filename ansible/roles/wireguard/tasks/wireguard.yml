@@ -10,4 +10,4 @@
 
 - name: Run `docker-compose up`
   community.docker.docker_compose:
-    project_src: "{{ homedir }}/compose"
+    project_src: "{{ homedir }}/compose/wireguard"

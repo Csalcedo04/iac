@@ -15,3 +15,11 @@
     - role: wireguard
   vars_files:
     - ./vars/main.yml
+
+- name: Install and setup TODO app
+  hosts: todo
+  become: yes
+  roles:
+    - role: todo
+  vars_files:
+    - ./vars/main.yml

@@ -1,4 +1,10 @@
-- name: Make sure rsync service is running
+- name: sshd restart
+  ansible.builtin.service:
+    name: sshd
+    state: restarted
+    enabled: true
+
+- name: Make sure rsyncd is running
   systemd:
     name: rsync
     enabled: true
