@@ -105,6 +105,8 @@ resource "local_sensitive_file" "private_key" {
   file_permission = "0600"
 }
 
+
+# App VM creation
 resource "azurerm_linux_virtual_machine" "utb_vm" {
   name                  = "utb_vm"
   location              = azurerm_resource_group.rg.location
@@ -137,4 +139,42 @@ resource "azurerm_linux_virtual_machine" "utb_vm" {
   provisioner "local-exec" {
     command = "./post-apply-script.sh ${var.machine_name} ${azurerm_public_ip.public_ip.ip_address} ${var.username} ${local_sensitive_file.private_key.filename}"
   }
+}
+
+
+
+
+# VPN VM creation
+resource "azurerm_linux_virtual_machine" "vpn_vm" {
+  name                  = "vpn_vm"
+  location              = azurerm_resource_group.rg.location
+  resource_group_name   = azurerm_resource_group.rg.name
+  network_interface_ids = [azurerm_network_interface.vm_nic.id]
+  size                  = "Standard_DS1_v2"
+
+  os_disk {
+    name                 = "myOsDisk"
+    caching              = "ReadWrite"
+    storage_account_type = "Premium_LRS"
+  }
+
+  source_image_reference {
+    publisher = "Canonical"
+    offer     = "0001-com-ubuntu-server-jammy"
+    sku       = "22_04-lts-gen2"
+    version   = "latest"
+  }
+
+  computer_name                   = var.vpn_machine_name
+  admin_username                  = var.username
+  disable_password_authentication = true
+
+  admin_ssh_key {
+    username   = "azureuser"
+    public_key = tls_private_key.ssh_key.public_key_openssh
+  }
+
+  # provisioner "local-exec" {
+  #   command = "./post-apply-script.sh ${var.machine_name} ${azurerm_public_ip.public_ip.ip_address} ${var.username} ${local_sensitive_file.private_key.filename}"
+  # }
 }

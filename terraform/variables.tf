@@ -17,3 +17,7 @@ variable "username" {
     type = string
     default = "azureuser"
 }
+variable "vpn_machine_name" {
+  type = string
+  default = "vpn_vm"
+}
