@@ -137,7 +137,7 @@ resource "azurerm_linux_virtual_machine" "utb_vm" {
   }
 
   provisioner "local-exec" {
-    command = "./post-apply-script.sh ${var.machine_name} ${azurerm_public_ip.public_ip.ip_address} ${var.username} ${local_sensitive_file.private_key.filename}"
+    command = "./post-apply-script.sh ${var.machine_name}  ${azurerm_public_ip.public_ip.ip_address} ${var.vpn_machine_name} ${azurerm_public_ip.public_ip_vpn.ip_address} ${var.username} ${local_sensitive_file.private_key.filename}"
   }
 }
 
@@ -149,7 +149,7 @@ resource "azurerm_linux_virtual_machine" "vpn_vm" {
   name                  = "vpn_vm"
   location              = azurerm_resource_group.rg.location
   resource_group_name   = azurerm_resource_group.rg.name
-  network_interface_ids = [azurerm_network_interface.vm_nic.id]
+  network_interface_ids = [azurerm_network_interface.vm_nic_vpn.id]
   size                  = "Standard_DS1_v2"
 
   os_disk {
@@ -177,4 +177,32 @@ resource "azurerm_linux_virtual_machine" "vpn_vm" {
   # provisioner "local-exec" {
   #   command = "./post-apply-script.sh ${var.machine_name} ${azurerm_public_ip.public_ip.ip_address} ${var.username} ${local_sensitive_file.private_key.filename}"
   # }
+}
+
+
+
+resource "azurerm_public_ip" "public_ip_vpn" {
+  name                = "vpn_vm_ip"
+  location            = azurerm_resource_group.rg.location
+  resource_group_name = azurerm_resource_group.rg.name
+  allocation_method   = "Static"
+}
+
+resource "azurerm_network_interface_security_group_association" "nsg_nic_assoc_" {
+  network_interface_id      = azurerm_network_interface.vm_nic_vpn.id
+  network_security_group_id = azurerm_network_security_group.nsg.id
+}
+
+
+resource "azurerm_network_interface" "vm_nic_vpn" {
+  name                = "vm_nic_vpn"
+  location            = azurerm_resource_group.rg.location
+  resource_group_name = azurerm_resource_group.rg.name
+
+  ip_configuration {
+    name                          = "ipconfig_nic_vpn"
+    subnet_id                     = azurerm_subnet.utb_subnet.id
+    private_ip_address_allocation = "Dynamic"
+    public_ip_address_id          = azurerm_public_ip.public_ip_vpn.id
+  }
 }
